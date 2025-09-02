@@ -1,0 +1,23 @@
+# Entornos virtuales
+.venv/
+env/
+venv/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Archivos temporales
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# TensorFlow / Keras
+*.h5
+*.ckpt

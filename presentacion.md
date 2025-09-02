@@ -9,196 +9,203 @@ paginate: true
 
 <!--
 Notas:
-Bienvenidos a esta píldora formativa.  
-Hoy vamos a descubrir qué son los modelos de difusión, cómo funcionan en teoría, cómo se aplican a imágenes y qué hace que Stable Diffusion sea tan especial.  
-El objetivo es que todos entendamos el concepto desde cero, pero también que veamos su parte técnica y práctica.
+Imagina pedir a una IA: “Dibuja un perro astronauta al estilo Van Gogh”.  
+Y la IA lo crea desde ruido puro.  
+Eso es lo que vamos a explicar hoy: los modelos de difusión y cómo Stable Diffusion lo hace posible.
 -->
+
+🖼️ Imagen sugerida: una obra generada con Stable Diffusion (ej. astronauta + estilo artístico).  
 
 ---
 
-# 🤖 ¿Qué son los modelos de difusión?
-- Modelos **generativos** de Deep Learning.  
-- Diseñados para **crear nuevos datos** a partir de lo aprendido.  
-- En el caso de Stable Diffusion → **imágenes**.  
+# 🤖 ¿Qué son los modelos generativos?
+- Crean nuevos datos que parecen reales.  
+- Aprenden de un dataset.  
+- En nuestro caso → imágenes.  
+
+👉 Imaginan a partir de ruido.
 
 <!--
 Notas:
-Stable Diffusion pertenece a la familia de modelos de difusión.  
-Estos modelos son generativos, es decir, crean nuevos datos que se parecen a los ejemplos que vieron durante su entrenamiento.  
-En nuestro caso, hablamos de imágenes. Pero la idea general también se aplica a audio, vídeo o incluso moléculas.
+Los modelos generativos no se limitan a reconocer patrones: crean ejemplos nuevos.  
+Stable Diffusion pertenece a esta familia.
 -->
+
+🖼️ Imagen sugerida: diagrama con “Dataset → Modelo → Nuevas imágenes”.
 
 ---
 
 # 🔄 El proceso de difusión
-- **Dos fases principales**:
-  1. Difusión directa → añadir ruido progresivo.
-  2. Difusión inversa → eliminar el ruido paso a paso.  
-
----
-
-# 🌫️ Fase 1: Difusión directa
-Imagen → Ruido paso a paso → Imagen irreconocible
+Dos fases:  
+1. Difusión directa → añadir ruido.  
+2. Difusión inversa → quitar ruido.
 
 <!--
 Notas:
-En la fase directa, cogemos una imagen del dataset y le vamos añadiendo ruido gaussiano.  
-Al principio la imagen todavía se reconoce, pero a medida que añadimos más pasos se va desfigurando hasta volverse puro ruido.  
-Este proceso se puede hacer matemáticamente sin problema.
+La clave es un proceso en dos fases: destruir (añadiendo ruido) y reconstruir (quitando ruido).
 -->
+
+🖼️ Usa tu captura **sd13.png** (imagen → ruido progresivo).
 
 ---
 
-# ✨ Fase 2: Difusión inversa
-Ruido → Eliminación progresiva → Imagen reconstruida
+# 🌫️ Difusión directa
+Imagen clara → ruido paso a paso → ruido total  
+
+👉 Como empañar una ventana.
 
 <!--
 Notas:
-La parte difícil llega cuando intentamos revertir el proceso.  
-¿Cómo sabemos cuánto ruido quitar en cada paso?  
-¿Cuántos pasos necesitamos?  
-Para resolverlo, se entrena una red neuronal especializada que predice el nivel de ruido en cada iteración.
+Primera fase: añadir ruido gaussiano progresivamente hasta que la imagen queda irreconocible.
 -->
+
+🖼️ Usa tu captura **sd14.png** (ruido en aumento).  
+
+---
+
+# ✨ Difusión inversa
+Ruido total → eliminación progresiva → imagen reconstruida  
+
+👉 Como desempañar la ventana.
+
+<!--
+Notas:
+La parte difícil: aprender a quitar el ruido paso a paso.  
+Aquí entra la U-Net.
+-->
+
+🖼️ Usa tu captura **sd18.png** (ruido → imagen).  
 
 ---
 
 # 🧠 La red U-Net
-- Arquitectura clave en la fase inversa.  
-- Aprende a predecir **qué ruido quitar** en cada paso.  
+- Predice cuánto ruido quitar en cada paso.  
 - Entrada: imagen ruidosa.  
-- Salida: estimación de ruido.  
+- Salida: ruido estimado.  
+- Permite generar desde ruido puro.
 
 <!--
 Notas:
-Aquí aparece la red U-Net.  
-Es una arquitectura muy usada en visión por computadora porque combina una parte de contracción (extraer características) con una de expansión (reconstrucción).  
-En Stable Diffusion, su papel es predecir el ruido que hay que eliminar.  
-Gracias a U-Net podemos partir de una nube de ruido puro y acabar con una imagen coherente.
+La U-Net es la red central: su arquitectura en forma de U extrae y reconstruye características, prediciendo el ruido.
 -->
+
+🖼️ Imagen sugerida: esquema de U-Net (encogimiento → expansión con skip connections).  
 
 ---
 
 # 🎨 Condicionamientos
-- El modelo necesita **control creativo**.  
-- Tipos de condicionamiento:
-  - Texto (prompt).  
-  - Mapas de profundidad.  
-  - Máscaras de edición.  
-  - Imágenes de referencia.  
+El modelo necesita control creativo:  
+- Texto (prompts).  
+- Imágenes de referencia.  
+- Máscaras de edición.  
+- Mapas de profundidad.
+
+👉 Como dar instrucciones a un pintor.
 
 <!--
 Notas:
-El modelo por sí mismo solo denoisea, pero no sabe qué imagen generar.  
-Para guiarlo usamos condicionamientos.  
-El más famoso: los prompts de texto. Escribir “un perro astronauta en estilo Van Gogh” hace que la U-Net reconstruya el ruido en esa dirección.  
-Pero también se pueden usar mapas de profundidad, máscaras para editar partes de la imagen, o incluso imágenes de referencia.  
-Esto es lo que hace que podamos tener un control casi artístico sobre el proceso.
+Los condicionamientos guían el proceso.  
+CLIP transforma el texto en vectores que guían a la U-Net.
 -->
+
+🖼️ Imagen sugerida: prompt → imagen.  
 
 ---
 
-# ⚡ El problema de los costes
-- Modelos clásicos trabajan en **espacio de píxeles**.  
-- Ejemplo: imagen 512×512 RGB = ~800.000 valores.  
-- Añadir/quitar ruido sobre todos esos valores → **muy lento y costoso**.  
+# ⚡ Coste computacional
+Problema de los modelos clásicos:  
+- Operan en píxeles.  
+- Imagen 512×512 RGB ≈ 800.000 valores.  
+- Muy lentos y pesados.
 
 <!--
 Notas:
-Los modelos de difusión originales operaban directamente sobre los píxeles de la imagen.  
-El problema es que una sola imagen de 512×512 píxeles y tres canales de color implica manejar casi un millón de valores.  
-Y recordad que el proceso de difusión implica cientos o miles de pasos.  
-Esto hace que los cálculos sean muy pesados y lentos.
+Trabajar en píxeles hacía los modelos lentísimos e inviables para usuarios comunes.
 -->
+
+🖼️ Imagen sugerida: gráfico con muchos píxeles / dataset pesado.  
 
 ---
 
-# 💡 La innovación: espacio latente
-- Stable Diffusion introduce los **Modelos de Difusión Latente**.  
-- En lugar de trabajar con píxeles, lo hace en un espacio matemático **comprimido**.  
-- Beneficio: **eficiencia y rapidez**.  
+# 💡 Espacio latente
+- Stable Diffusion opera en un espacio comprimido.  
+- Representa lo esencial de la imagen.  
+- Más rápido y eficiente.
+
+👉 Como usar un mapa en lugar de recorrer toda la ciudad.
 
 <!--
 Notas:
-La solución de Stability AI fue operar en un espacio más compacto: el espacio latente.  
-Aquí la imagen se representa en menos dimensiones, lo que reduce drásticamente los cálculos.  
-En lugar de trabajar con todos los píxeles, trabajamos con una versión comprimida que conserva la esencia visual.
+El espacio latente reduce el problema a menos dimensiones sin perder lo importante.
 -->
+
+🖼️ Usa tu captura **3b8332e3.png** (esquema latente).  
 
 ---
 
-# 🌀 El papel del VAE
-- **Variational Autoencoder (VAE)**: red con dos partes.
-  - **Encoder (E):** lleva la imagen al espacio latente.  
-  - **Decoder (D):** reconstruye la imagen desde el espacio latente.  
+# 🌀 VAE (Variational Autoencoder)
+- **Encoder (E):** convierte a espacio latente.  
+- **Decoder (D):** reconstruye la imagen.  
+
+👉 El VAE es el traductor entre píxeles y latente.
 
 <!--
 Notas:
-Para movernos entre el espacio de píxeles y el espacio latente necesitamos un VAE.  
-El encoder comprime la imagen en una representación abstracta, y el decoder la reconstruye después.  
-Así todo el proceso de difusión ocurre en el espacio latente, y solo al final recuperamos la imagen visible.
+El VAE hace posible trabajar en latente.  
+Encoder → comprime.  
+Decoder → reconstruye.
 -->
+
+🖼️ Usa tu captura **56633feb.png** (encoder/decoder).  
 
 ---
 
-# 🔗 Uniendo todo
-Stable Diffusion combina:
-- Difusión en espacio latente (eficiencia).  
-- U-Net (predicción del ruido).  
+# 🔗 Unión de elementos
+Stable Diffusion combina:  
+- Difusión latente (eficiencia).  
+- U-Net (ruido).  
 - Condicionamientos (control creativo).  
+- VAE (traducción).  
+- CLIP (texto → vector).  
 
 <!--
 Notas:
-Si juntamos todas las piezas tenemos Stable Diffusion:  
-1. Un modelo eficiente gracias al espacio latente.  
-2. Preciso gracias a la U-Net que elimina el ruido.  
-3. Creativo y versátil gracias a los condicionamientos.  
-El resultado es un modelo ligero, versátil y open source.
+La fuerza de Stable Diffusion está en juntar todas estas piezas.  
+Así se logra un modelo ligero, potente y abierto.
 -->
+
+🖼️ Imagen sugerida: esquema integrador con todas las piezas.  
 
 ---
 
 # 🚀 Stable Diffusion
-- **Ligero**: puede ejecutarse en PCs con GPU común.  
-- **Versátil**: soporta texto, imágenes, máscaras.  
-- **Open Source**: la comunidad crea y mejora variantes.  
-
-<!--
-Notas:
-Por todo esto Stable Diffusion se volvió revolucionario en 2022.  
-No solo democratizó el acceso a la IA generativa de imágenes, sino que al ser open source, miles de personas han creado sus propias variantes.  
-Hoy existen modelos especializados en retratos, anime, arquitectura, medicina, etc.
--->
+- **Ligero**: se ejecuta en PCs con GPU.  
+- **Versátil**: texto, imágenes, máscaras.  
+- **Open Source**: comunidad de mejoras.  
 
 ---
 
 # 🌍 Aplicaciones y futuro
 ✅ Arte y diseño  
-✅ Marketing y creatividad  
-✅ Videojuegos  
+✅ Marketing  
+✅ Videojuegos y cine  
 ✅ Medicina e investigación  
+
 ⚠️ Riesgos: deepfakes, copyright, sesgos  
 
 <!--
 Notas:
-Las aplicaciones son enormes: desde arte digital y videojuegos, hasta investigación médica.  
-Pero no podemos olvidar los riesgos: la creación de deepfakes, problemas de copyright, y los sesgos en los datos de entrenamiento.  
-El futuro apunta a modelos multimodales capaces de trabajar no solo con imágenes, sino también con audio y vídeo.
+Aquí puedes abrir debate sobre riesgos y futuro multimodal: texto + imagen + audio + vídeo.
 -->
+
+🖼️ Imagen sugerida: collage de aplicaciones (arte, cine, medicina).  
 
 ---
 
-# 📚 Conclusión
-- Los modelos de difusión generan imágenes **a partir de ruido**.  
-- Stable Diffusion lo hace **eficiente** en espacio latente.  
-- Nos da **control creativo** mediante condicionamientos.  
-- Y es **open source**, impulsando una gran comunidad.  
+# ❓ Pregunta final
+¿Dónde ponemos los límites al uso de estas herramientas?
 
 <!--
 Notas:
-Cerramos con un resumen:  
-1. Los modelos de difusión son capaces de imaginar a partir de ruido.  
-2. Stable Diffusion optimiza este proceso en el espacio latente.  
-3. Gracias a los condicionamientos podemos guiar la creatividad.  
-4. Y al ser open source, se ha convertido en un estándar de la comunidad.  
-La idea final: lo que antes era ciencia ficción, hoy está al alcance de cualquiera con un ordenador.
+Cierra con una pregunta abierta para fomentar reflexión y debate.
 -->
